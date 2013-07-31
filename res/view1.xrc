@@ -53,16 +53,17 @@
 						<option>0</option>
 						<flag>wxALL</flag>
 						<border>5</border>
-						<object class="wxStaticText" name="m_staticText29">
-							<label>MyLabel</label>
-							<wrap>-1</wrap>
+						<object class="wxHyperlinkCtrl" name="m_hyperlink4">
+							<label>insert</label>
+							<url>http://www.wxformbuilder.org</url>
+							<style>wxHL_DEFAULT_STYLE</style>
 						</object>
 					</object>
 					<object class="sizeritem">
 						<option>0</option>
 						<flag>wxALL</flag>
 						<border>5</border>
-						<object class="wxTextCtrl" name="m_textCtrl15">
+						<object class="wxTextCtrl" name="tbTxt">
 							<value></value>
 							<maxlength>0</maxlength>
 						</object>

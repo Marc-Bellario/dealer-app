@@ -169,7 +169,7 @@
 							<option>0</option>
 							<flag>wxALL</flag>
 							<border>5</border>
-							<object class="wxDatePickerCtrl" name="m_datePicker2">
+							<object class="wxDatePickerCtrl" name="m_datePick02">
 								<style>wxDP_DEFAULT</style>
 							</object>
 						</object>
@@ -177,7 +177,7 @@
 							<option>0</option>
 							<flag>wxALL</flag>
 							<border>5</border>
-							<object class="wxDatePickerCtrl" name="m_datePicker3">
+							<object class="wxDatePickerCtrl" name="m_datePick03">
 								<style>wxDP_DEFAULT</style>
 							</object>
 						</object>

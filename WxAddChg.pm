@@ -246,8 +246,13 @@ sub show_dialog {
    my $id;
    
     
-      my $sizer = $date->GetContainingSizer();
-      my $parentP = $date->GetParent();
+#      my $sizer = $date->GetContainingSizer();
+#      my $parentP = $date->GetParent();
+      my $sizer;
+      my $parentP;
+
+
+
 #       $date->Hide();
 #      $date->SetDefaultStyle( wxDP_ALLOWNONE);
 #    $date->SetStyle( wxDP_ALLOWNONE );
@@ -295,16 +300,16 @@ if (0){
     if ( $currentLength > 15 && $data[15] ne "." ) { $note->SetValue($data[15]) };
     
 #   if ( $currentLength > 6 && $data[6] ne "." && $data[6] =~ /\d{3,}-\d\d-\d\d/) { $date->SetValue($data[6]) }; 
- my ($yy, $dd, $mm ) =  ParseDate($data[8]);
+ my ($yy, $dd, $mm ) =  ParseInDate($data[8]);
 
  my $dateObj = Wx::DateTime->newFromDMY($dd,$mm-1,$yy, 1,1,1,1);
  my $tmpstr = $dateObj->Format;
  print " date = $data[8] \n  dateObj = $dateObj \n str = $tmpstr \n";
  if ( $currentLength > 8 && $data[8] ne "." ) { $refdate->SetValue($dateObj) }; 
  
-  ($yy, $dd, $mm ) =  ParseDate($data[22]);
+  ($yy, $dd, $mm ) =  ParseInDate($data[22]);
 
-  $dateObj = Wx::DateTime->newFromDMY($dd,$mm-1,$yy, 1,1,1,1);
+  $dateObj = Wx::DateTime->newFromDMY($dd,$mm,$yy, 1,1,1,1);
   $tmpstr = $dateObj->Format;
  print " date = $data[22] \n  dateObj = $dateObj \n str = $tmpstr \n";
 
@@ -317,6 +322,28 @@ if (0){
     print " exit - add - change dialog \n";
 #    $dialog->Destroy;
 }       
+
+sub ParseInDate
+{
+    my $lclDate = shift;
+    my $m;
+    my $y;
+    my $d;
+ #   $lclDate =~ s{\/}{-}g;
+    print " date mod: $lclDate \n";
+    $m = substr($lclDate,4,2); 
+    $y = substr($lclDate,0,4);
+    $d = substr($lclDate,6,2);
+ #   \d{3,}-\d\d-\d\d
+  #  $date =~ /^(\d{4}) (\d{2}) (\d{2})\ (\d{2}):(\d{2})$/x;
+#  my ($m,$d,$y) = $lclDate =~ /(\d+)-(\d+)-(\d+)/
+  
+  
+#   or die;
+   print " year = $y , month = $m, day = $d \n ";   
+    return ($y, $d, $m );
+}
+
 
 sub ParseDate
 {
@@ -479,6 +506,10 @@ sub CreateString
     my @retArray;
     my $id;
     my $cnt = 0;
+    my $yy;
+    my $dd;
+    my $mm;
+    my $tdate;
     
          push(@retArray, $bname->GetValue());
          push(@retArray, $firstname->GetValue());
@@ -487,7 +518,12 @@ sub CreateString
          push(@retArray, $mphone->GetValue());
          push(@retArray, $email->GetValue()); 
          push(@retArray, $refto->GetValue());
-         push(@retArray, $refdate->GetValue()->FormatDate);
+                       ($yy, $dd, $mm ) = ParseDate($refdate->GetValue()->FormatDate);
+              $dd = "0". $dd unless length $dd > 1;
+              $mm = "0" .$mm unless length $mm > 1;
+          $tdate = $yy . $mm . $dd ; 
+                    push(@retArray, $tdate);
+
          push(@retArray, $address->GetValue());
          push(@retArray, $city->GetValue());
          push(@retArray, $state->GetValue());
@@ -501,7 +537,14 @@ sub CreateString
          push(@retArray, $stat->GetValue());
           push(@retArray, '.');   #  quote req 
           push(@retArray, '.');   #  quote other req
-         push(@retArray, $orgdate->GetValue()->FormatDate);
+              ($yy, $dd, $mm ) = ParseDate($orgdate->GetValue()->FormatDate);
+              $dd = "0". $dd unless length $dd > 1;
+              $mm = "0" .$mm unless length $mm > 1;
+          $tdate = $yy . $mm . $dd ; 
+                    push(@retArray, $tdate);
+          
+              print " <**> date: $tdate\n";   
+   
    
   return @retArray;
 }

@@ -103,6 +103,9 @@ my ($idLink0) = FindWindowByXid('m_hyperlink2');
 my ($idLink1) = FindWindowByXid('m_hyperlink3');
  Wx::Event::EVT_HYPERLINK($dialog,$idLink1, \&Next);
 
+my ($idLink2) = FindWindowByXid('m_hyperlink4');
+ Wx::Event::EVT_HYPERLINK($dialog,$idLink2, \&InsertNote);
+
 my $ck_dialog = 0;
 if ( $ck_dialog)
 {
@@ -171,7 +174,7 @@ sub show_dialog {
    
    FindWindowByXid('tcOUT')->SetValue(buildTextString());
    FindWindowByXid('wxID_OK')->SetLabel("Note");
-   
+   FindWindowByXid('tbTxt')->SetValue(buildTxtBoxOut());
     $dialog->ShowModal();
     print " exit - add - change dialog \n";
 #    $dialog->Destroy;
@@ -181,7 +184,7 @@ sub show_dialog {
  {
      my(@current) = @_;
      print "setNote - $g_swt\n";
-     
+     $g_current_page = 0;
      $g_id = $current[0];
 
     my $note_cnt = get_notecount();
@@ -192,7 +195,7 @@ sub show_dialog {
       
             $g_id_hash{"rec:0"} = $g_id;
             $g_note_hash{"rec:0"} = $current[15] ;
-
+        
      if ( $note_cnt > 0 )
      {
          FindWindowByXid('m_hyperlink3')->SetLabel('next');
@@ -203,7 +206,7 @@ sub show_dialog {
      }     
      else
      {
-         FindWindowByXid('m_hyperlink3')->SetLabel('insert');
+#         FindWindowByXid('m_hyperlink3')->SetLabel('insert');
          FindWindowByXid('m_hyperlink2')->Disable();
          $g_paging = 0;
          $g_type = 0;
@@ -211,7 +214,8 @@ sub show_dialog {
      }
 
       
-     
+                 FindWindowByXid('tbTxt')->SetValue(buildTxtBox());
+
      
          if ($g_swt == 1)
          {
@@ -227,6 +231,18 @@ sub show_dialog {
          $dialog->ShowModal();
  } 
   
+sub buildTxtBoxOut
+{
+    #my $page_no = check_pagecount()
+    return "record detail";
+}
+
+sub buildTxtBox
+{
+    my $page_no = check_pagecount();
+    return "Page $page_no of $g_total_page_count";
+}
+
 sub buildTextString
 {
        $g_swt = 1;
@@ -270,15 +286,13 @@ sub Prev
    
    print "Prev - pageno = $pageno of $g_total_page_count\n";   
 
-    if ( $pageno > 0 ) { $pageno--;dec_pagecount(); };  
-
-    if ($g_paging == 1)
-    {
-        my $thing = "rec:$pageno";
-        FindWindowByXid('tcOUT')->SetValue($g_note_hash{$thing});
-        $g_type = 2;
-        FindWindowByXid('m_hyperlink3')->SetLabel('next');
+     if ( $pageno > 0 ) 
+    { 
+        $pageno--;
+         DisplayNote($pageno);
+         dec_pagecount();  
     }
+            FindWindowByXid('tbTxt')->SetValue(buildTxtBox());
 
  
 }
@@ -289,48 +303,40 @@ sub Next
     
     print "Next - pageno = $pageno of $g_total_page_count\n";    
     
-    if ($pageno == $g_total_page_count)
+    if ($pageno < $g_total_page_count)
     {
-        if (($g_type == 0) || ($q_type == 1))
-        {
-                       
-           FindWindowByXid('tcOUT')->SetValue('** new ** --');
-           $g_type = 4;
-           $q_type = 0;
-           print ".i ";
-        }
-        else
-        {
                    #
             $g_type = 2;
             $pageno++;
-            my $thing = "rec:$pageno";
-            FindWindowByXid('tcOUT')->SetValue($g_note_hash{$thing});
+            DisplayNote( $pageno );
              print "* ";
-         }
+         inc_pagecount(); 
     }
-    else
-    {
-        #
-        $g_type = 2;
-        $pageno++;
-        my $thing = "rec:$pageno";
-        FindWindowByXid('tcOUT')->SetValue($g_note_hash{$thing});
-        print ". ";
-    }
+
+                FindWindowByXid('tbTxt')->SetValue(buildTxtBox());
+
  
-    if ( $pageno < $g_total_page_count )
-    { 
-        inc_pagecount(); 
-    }
-    else
-    {
-        FindWindowByXid('m_hyperlink3')->SetLabel('insert');
-        $q_type = 1;
-        $g_current_page = $g_total_page_count;
-    }
     print " exit - Next - pageno = $pageno - total_page - $g_total_page_count - current = $g_current_page \n"; 
 }
+
+sub InsertNote
+{
+
+          FindWindowByXid('tcOUT')->SetValue('** new ** --');
+           $g_type = 4;
+           $q_type = 0;
+           print ".i ";
+
+}
+
+
+sub DisplayNote
+{
+        my $pageno = shift;
+        my $thing = "rec:$pageno";
+        FindWindowByXid('tcOUT')->SetValue($g_note_hash{$thing});
+ }
+
 
 sub check_pagecount
 {
@@ -367,10 +373,18 @@ sub setUPT
             {
                 insert_notes();
                 update_leaddata_note();
+                $g_total_page_count++;
             }
             else
             {
-                #  can not reach here ?
+                if(($g_type == 2) && ($g_current_page > 0 ))
+                {#  can not reach here ?
+                         update_notes();
+                }
+                else
+                {
+                    update_leaddata_note();
+                }                #  can not reach here ?
             }
         }
     }
@@ -382,7 +396,13 @@ sub update_notes
     
       my $note = FindWindowByXid('tcOUT')->GetValue();
 
-      print "update_notes - g_id: $g_id --  note: $note \n";   
+      my $page_no =  $g_current_page;
+      my $thing = "rec:$page_no";
+      my $note_id = $g_id_hash{$thing};        
+         
+         
+      print "current_page: $page_no ....";    
+      print "update_notes - g_id: $g_id -- note_id: $note_id note: $note \n";   
     
      #my (@ckarray) = @_;      
      my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","", {});
@@ -393,11 +413,15 @@ sub update_notes
      my   $statement = "UPDATE Note SET Note = ? WHERE Lead_ID = ? and Note_ID = ?"; 
 	                   
 #        $statement = "UPDATE LeadStats SET " . $tempe . "= ?, Contact_Notes = ? WHERE statLeadLnk = ?"; 
-       $dbh->do($statement, undef, $note,  $g_id);
+       $dbh->do($statement, undef, $note,  $g_id, $note_id);
        $dbh->disconnect;
 
 }
 
+sub get_note_id
+{
+    return $g_id_hash{$g_current_page};
+}
 
 sub update_leaddata_note
 {
@@ -458,7 +482,7 @@ sub get_notecount
 sub select_notes
 {
     
-    print "select_notes\n";
+    print "select_notes - g_id: $g_id\n";
     
     my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","", {});
 
@@ -474,6 +498,7 @@ sub select_notes
     while (my @result = $sth->fetchrow_array()) {
             print ". ";
             $thing = "rec:$i";
+            print ". $thing ---> $result[1]\n";
             $g_id_hash{$thing} = $result[0];
             $g_note_hash{$thing} = $result[2] ;
             $i++;
@@ -491,7 +516,7 @@ sub switch_current
            $g_id_hash{"rec:0"} = -1;
             $g_note_hash{"rec:0"} = FindWindowByXid('tcOUT')->GetValue() ;
             $g_note_hash{"rec:$g_current_page"} = $current_note;
-            $g_id_hash{"rec:$g_current_page"} = $current_hash_id;
+#            $g_id_hash{"rec:$g_current_page"} = $current_hash_id;
             if ($thing_swt == 1) {return ($current_hash_id,$current_note)}; 
             
 }

@@ -5,8 +5,8 @@
 [Setup]
 AppID={{5AA5806E-6C03-1014-88E4-DC90ADE64201}
 AppName=dealer_app
-AppVersion=0.0.0.6
-AppVerName=dealer_app 0.0.0.6
+AppVersion=0.0.0.9
+AppVerName=dealer_app 0.0.0.9
 AppPublisher=will
 DefaultDirName={pf}\MyApp
 DisableDirPage=no
@@ -24,13 +24,13 @@ OutputManifestFile=C:\temp\faz3\installer\innosetup.manifest
 InternalCompressLevel=Max
 ShowLanguageDialog=no
 UninstallDisplayName=dealer_app
-VersionInfoVersion=0.0.0.6
+VersionInfoVersion=0.0.0.9
 VersionInfoCompany=will
 VersionInfoDescription=dealer_app Installer
-VersionInfoTextVersion=dealer_app Installer 0.0.0.6
+VersionInfoTextVersion=dealer_app Installer 0.0.0.9
 VersionInfoCopyright=Copyright (C) 2013 will
 VersionInfoProductName=dealer_app
-VersionInfoProductVersion=0.0.0.6
+VersionInfoProductVersion=0.0.0.9
 UninstallFilesDir={app}\bin
 MinVersion=,5.1.2600
 PrivilegesRequired=lowest

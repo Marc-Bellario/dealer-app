@@ -62,9 +62,11 @@ Wx::Event::EVT_BUTTON($dialog, $idCancel, \&Exit );
 
 append_combos();
 
-         my ($idType) = FindWindowByXid('ckType');
+          my ($idType) = FindWindowByXid('ckType');
           my ($idState) = FindWindowByXid('ckState');
           my ($idName) = FindWindowByXid('ckName');
+          my ($idDate) = FindWindowByXid('ckDateBefore');
+          my ($idDate2) = FindWindowByXid('ckDateAfter');
 
 #   enable controls on start 
              $idName->SetValue(0);
@@ -72,17 +74,23 @@ append_combos();
              $idType->SetValue(0);
            FindWindowByXid('ckType')->Enable();
            FindWindowByXid('ckState')->Enable();   
-            FindWindowByXid('ckName')->Enable();
+           FindWindowByXid('ckName')->Enable();
             
 #  disable date for release 1          
-           FindWindowByXid('ckDateBefore')->Disable();
-          FindWindowByXid('ckDateAfter')->Disable();
+          FindWindowByXid('ckDateBefore')->Enable();
+          FindWindowByXid('ckDateAfter')->Enable();
 
  Wx::Event::EVT_CHECKBOX($dialog,$idType,\&disableFromType);
  
-  Wx::Event::EVT_CHECKBOX($dialog,$idState,\&disableFromState);
+ Wx::Event::EVT_CHECKBOX($dialog,$idState,\&disableFromState);
 
-  Wx::Event::EVT_CHECKBOX($dialog,$idName,\&disableFromName);
+ Wx::Event::EVT_CHECKBOX($dialog,$idName,\&disableFromName);
+  
+ Wx::Event::EVT_CHECKBOX($dialog,$idDate,\&disableFromDate);
+    
+ Wx::Event::EVT_CHECKBOX($dialog,$idDate2,\&disableFromDate);
+
+
 
 # 
 # Set event handlers 
@@ -153,15 +161,19 @@ my $cnt = 0;
 sub  disableFromType
 {
          print "disable for type\n";
-           if ( FindWindowByXid('ckName')->IsChecked)
-          {
+         if ( FindWindowByXid('ckType')->IsChecked)
+         {
                FindWindowByXid('ckState')->Disable();
                FindWindowByXid('ckName')->Disable();
+               FindWindowByXid('ckDateBefore')->Disable();
+               FindWindowByXid('ckDateAfter')->Disable();
          }
          else
          {
                FindWindowByXid('ckState')->Enable();
                FindWindowByXid('ckName')->Enable();
+               FindWindowByXid('ckDateBefore')->Enable();
+               FindWindowByXid('ckDateAfter')->Enable();
          }
 }
 
@@ -169,13 +181,17 @@ sub disableFromName
 {
           if ( FindWindowByXid('ckName')->IsChecked)
           {
-             FindWindowByXid('ckType')->Disable();
+              FindWindowByXid('ckType')->Disable();
               FindWindowByXid('ckState')->Disable();
+              FindWindowByXid('ckDateBefore')->Disable();
+              FindWindowByXid('ckDateAfter')->Disable();
          }
          else
          {
-               FindWindowByXid('ckType')->Enable();
+              FindWindowByXid('ckType')->Enable();
               FindWindowByXid('ckState')->Enable();
+              FindWindowByXid('ckDateBefore')->Enable();
+              FindWindowByXid('ckDateAfter')->Enable();              
          }
 }
 
@@ -184,13 +200,34 @@ sub disableFromState
           print "disable for state\n";   
           if ( FindWindowByXid('ckState')->IsChecked)
           {
-             FindWindowByXid('ckType')->Disable();
+              FindWindowByXid('ckType')->Disable();
               FindWindowByXid('ckName')->Disable();
+              FindWindowByXid('ckDateBefore')->Disable();
+              FindWindowByXid('ckDateAfter')->Disable();
          }
          else
          {
               FindWindowByXid('ckType')->Enable();
               FindWindowByXid('ckName')->Enable();
+              FindWindowByXid('ckDateBefore')->Enable();
+              FindWindowByXid('ckDateAfter')->Enable();              
+         }
+}
+
+sub disableFromDate
+{
+          print "disable for date\n";   
+          if ( ( FindWindowByXid('ckDateBefore')->IsChecked) || (FindWindowByXid('ckDateAfter')->IsChecked) )
+          {
+              FindWindowByXid('ckType')->Disable();
+              FindWindowByXid('ckName')->Disable();
+              FindWindowByXid('ckState')->Disable();
+         }
+         else
+         {
+              FindWindowByXid('ckType')->Enable();
+              FindWindowByXid('ckName')->Enable();
+              FindWindowByXid('ckState')->Enable();
          }
 }
 
@@ -219,6 +256,15 @@ sub OnSearch {
     my $type = settype();
     my $crit;
     $g_typeswt = $type;
+    
+    
+    my $yy;
+    my $dd;
+    my $mm;
+    my $tdate;
+    my $tdate2;
+    
+    
     if ($type == 1) {
            $g_state = FindWindowByXid('cbState')->GetValue();
            $g_crit = $g_state;
@@ -234,12 +280,59 @@ sub OnSearch {
                    if ($type == 3) {
                         $g_type = FindWindowByXid('cbType')->GetValue();
                         $g_crit = $g_type;
-                   }      
-
+                   }    
+                   else
+                   {
+                        if ($type == 4) {
+        #                     $g_type = FindWindowByXid('m_datePicker2')->GetValue();
+                              ($yy, $dd, $mm ) = ParseDate(FindWindowByXid('m_datePick02')->GetValue()->FormatDate);
+                              $dd = "0". $dd unless length $dd > 1;
+                              $mm = "0" .$mm unless length $mm > 1;
+                              $tdate = $yy . $mm . $dd ; 
+                              ($yy, $dd, $mm ) = ParseDate(FindWindowByXid('m_datePick03')->GetValue()->FormatDate);
+                              $dd = "0". $dd unless length $dd > 1;
+                              $mm = "0" .$mm unless length $mm > 1;
+                              $tdate2 = $yy . $mm . $dd ; 
+                              $g_crit = $tdate .  $tdate2 ;
+                        }
+                        else
+                        {
+                            if ($type == 5) {
+                               ($yy, $dd, $mm ) = ParseDate(FindWindowByXid('m_datePick02')->GetValue()->FormatDate);
+                               $dd = "0". $dd unless length $dd > 1;
+                               $mm = "0" .$mm unless length $mm > 1;
+                               $tdate = $yy . $mm . $dd ; 
+                               $g_crit = $tdate;
+                            }      
+                            else
+                            {
+                               if ($type == 6) {
+                                 ($yy, $dd, $mm ) = ParseDate(FindWindowByXid('m_datePick03')->GetValue()->FormatDate);
+                                 $dd = "0". $dd unless length $dd > 1;
+                                 $mm = "0" .$mm unless length $mm > 1;
+                                 $tdate = $yy . $mm . $dd ; 
+                                 $g_crit = $tdate;
+                               }      
+                            }   
+                        }      
+                    }
             }
     } 
  #   print "state: $g_state\n";
   Exit();
+}
+
+sub ParseDate
+{
+    my $lclDate = shift;
+    $lclDate =~ s{\/}{-}g;
+    print " date mod: $lclDate \n";
+ #   \d{3,}-\d\d-\d\d
+  #  $date =~ /^(\d{4}) (\d{2}) (\d{2})\ (\d{2}):(\d{2})$/x;
+  my ($m,$d,$y) = $lclDate =~ /(\d+)-(\d+)-(\d+)/
+   or die;
+   print " year = $y , month = $m, day = $d \n ";   
+    return ($y, $d, $m );
 }
 
 sub settype
@@ -248,29 +341,19 @@ sub settype
           my $swt_type = FindWindowByXid('ckType')->GetValue();
           my $swt_state = FindWindowByXid('ckState')->GetValue();
           my $swt_name = FindWindowByXid('ckName')->GetValue();
+          my $swt_date_before = FindWindowByXid('ckDateBefore')->GetValue();
+          my $swt_date_after = FindWindowByXid('ckDateAfter')->GetValue();
           
           print " state-swt: $swt_state\n";
           print  " name-swt: $swt_name\n";
           print "type-swt: $swt_type\n";
           
-          if (( $swt_type ==1 ) && ($swt_state!=1) && ($swt_name!=1))
-          {
-              $type = 3;
-          }
-          else
-          {
-                             if (( $swt_type != 1 ) && ($swt_state==1) && ($swt_name!=1))
-                             {
-                                     $type =1;
-                             }
-                             else
-                             {
-                                 if (( $swt_type!=1 ) && ($swt_state!=1) && ($swt_name==1))
-                                  {
-                                      $type = 2;
-                                  } 
-                             }
-          }
+         if ( $swt_type ==1) { $type = 3; }   else
+          {   if ( $swt_state == 1 ) { $type = 1; } else 
+          {   if ( $swt_name == 1) {  $type = 2; } else
+          {   if (($swt_date_before == 1) && ($swt_date_after == 1)) { $type = 4; } else
+          {  if ($swt_date_before == 1)  { $type = 5; } else
+          { $type = 6; }}}}}
           
          print "type:$type\n";
          return $type;

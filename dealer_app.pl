@@ -215,7 +215,6 @@ sub show_dialog_local
 {
    show_dialog(0, @currentDataRow);
    Refresh();	
-   
 }       
 
 #    sql set routines
@@ -237,11 +236,33 @@ sub name_search_sql
 
  sub type_search_sql
 {
-	
 	my  $search_crit = shift;
         $g_sqlcount =  " SELECT COUNT(*)  FROM LeadData where Sales_Status  = '$search_crit'";
         $g_sqlselect =   "SELECT " . $tmpe . " FROM LeadData where Sales_Status  = '$search_crit'";
 }
+      
+sub date_search_both
+{
+		my  $search_crit = shift;
+		my  $s1  = substr(  $search_crit, 0, 8);
+		my  $s2  = substr( $search_crit, 8, 8); 
+        $g_sqlcount =  " SELECT COUNT(*)  FROM LeadData where (Lead_ReferalDate  < '$s1' and Lead_ReferalDate  > '$s2')";
+        $g_sqlselect =   "SELECT " . $tmpe . " FROM LeadData where (Lead_ReferalDate  <  '$s1' and Lead_ReferalDate  >  '$s2')";
+}      
+
+sub  date_search_after
+{
+		my  $search_crit = shift;
+        $g_sqlcount =  " SELECT COUNT(*)  FROM LeadData where Lead_ReferalDate  > '$search_crit'";
+        $g_sqlselect =   "SELECT " . $tmpe . " FROM LeadData where Lead_ReferalDate  > '$search_crit'";
+}
+      
+sub date_search_before
+{
+			my  $search_crit = shift;
+        $g_sqlcount =  " SELECT COUNT(*)  FROM LeadData where Lead_ReferalDate  < '$search_crit'";
+        $g_sqlselect =   "SELECT " . $tmpe . " FROM LeadData where Lead_ReferalDate  < '$search_crit'";
+}      
       
  sub state_search_sql
 {
@@ -269,7 +290,7 @@ sub Delete
        show_delete(@currentDataRow);                     
 }
 
- sub Search
+sub Search
 {
 	my $local = $currentData;
 	print "Search: $local \n"; 
@@ -305,11 +326,29 @@ sub setsql
                                                 {  
                                                 	type_search_sql($search_crit);
                                                 }     
- 
-                                        }	                
+                                                else
+                                                {
+                                                	if ($type ==4)
+                                                	{
+                                                		date_search_both($search_crit);
+                                                	}
+                                                	else
+                                                	{
+                                                		if ($type == 5)
+                                                		{
+                                                			date_search_before($search_crit);
+                                                		}
+                                                		else
+                                                		{
+                                                			if ($type == 6)
+                                                			{
+                                                				date_search_after($search_crit);
+                                                			}
+                                                		}
+                                                	}
+                                                }
+                                         }	                
                                }
-                               
-                               
 }
  
 sub Search_Refresh
@@ -490,7 +529,7 @@ sub add_dialog
      }	
 	my $tmp = join (".",@darray);
 	$currentData = $id . " " . $tmp;
-       show_dialog(1);
+        show_dialog(1);
 }       
        
 sub getCurrent
@@ -501,10 +540,10 @@ sub getCurrent
 	print "id: $id\n";
 	
 	
-    my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","", {});
+        my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","", {});
 	
 	                   
-	  my @dbColumsT =     qw(LeadID 
+	my @dbColumsT =     qw(LeadID 
                     Lead_BusinessName 
                     Lead_FirstName 
                     Lead_LastName 

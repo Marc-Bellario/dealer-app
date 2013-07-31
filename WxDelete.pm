@@ -104,7 +104,7 @@ sub OnDelete {
 
       print " Enter Delete sub \n ";
          
-    my $dbfile = "contactmanagement.db";
+    my $dbfile = "leadmanagement.db";
     my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","", {});
      
 my $statement = "DELETE FROM LeadData WHERE LeadID=" . $data[0] ;
